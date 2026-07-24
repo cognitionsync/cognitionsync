@@ -1,82 +1,41 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: hsl(0 0% 100%);
-  --foreground: hsl(210 25% 7.8431%);
-  --card: hsl(180 6.6667% 97.0588%);
-  --card-foreground: hsl(210 25% 7.8431%);
-  --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(210 25% 7.8431%);
-  --primary: hsl(217.2 91.2% 59.8%);
-  --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(210 40% 94%);
-  --secondary-foreground: hsl(222.2 84% 4.9%);
-  --muted: hsl(210 40% 96%);
-  --muted-foreground: hsl(215.4 16.3% 46.9%);
-  --accent: hsl(210 40% 94%);
-  --accent-foreground: hsl(222.2 84% 4.9%);
-  --destructive: hsl(0 84.2% 60.2%);
-  --destructive-foreground: hsl(210 40% 98%);
-  --border: hsl(214.3 31.8% 91.4%);
-  --input: hsl(214.3 31.8% 91.4%);
-  --ring: hsl(217.2 91.2% 59.8%);
-  --chart-1: hsl(217.2 91.2% 59.8%);
-  --chart-2: hsl(159.7826 100% 36.0784%);
-  --chart-3: hsl(42.0290 92.8251% 56.2745%);
-  --chart-4: hsl(147.1429 78.5047% 41.9608%);
-  --chart-5: hsl(341.4894 75.2000% 50.9804%);
-  --sidebar: hsl(180 6.6667% 97.0588%);
-  --sidebar-foreground: hsl(210 25% 7.8431%);
-  --sidebar-primary: hsl(217.2 91.2% 59.8%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(210 40% 94%);
-  --sidebar-accent-foreground: hsl(222.2 84% 4.9%);
-  --sidebar-border: hsl(214.3 31.8% 91.4%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
-  --font-sans: "Inter", sans-serif;
-  --font-serif: Georgia, serif;
-  --font-mono: Menlo, monospace;
-  --radius: 0.5rem;
-  
-  /* Custom CognitionSync colors */
-  --navy: hsl(215 25% 27%);
-  --dark-navy: hsl(222 47% 11%);
-  --professional-blue: hsl(217.2 91.2% 59.8%);
-  --success: hsl(142 76% 36%);
-  --slate-50: hsl(210 40% 98%);
-  --slate-600: hsl(215 13.8% 34.1%);
-  --slate-700: hsl(215 19.3% 34.5%);
-  --slate-800: hsl(215 27.9% 16.9%);
-}
+  /* ===== "Ivory Intelligence" — light, professional, one accent ===== */
+  --background: 40 33% 96%;      /* warm ivory #F9F7F3 */
+  --foreground: 60 3% 8%;        /* near-black #141413 */
 
-.dark {
-  --background: hsl(222.2 84% 4.9%);
-  --foreground: hsl(210 40% 98%);
-  --card: hsl(222.2 84% 4.9%);
-  --card-foreground: hsl(210 40% 98%);
-  --popover: hsl(222.2 84% 4.9%);
-  --popover-foreground: hsl(210 40% 98%);
-  --primary: hsl(217.2 91.2% 59.8%);
-  --primary-foreground: hsl(222.2 47.4% 11.2%);
-  --secondary: hsl(217.2 32.6% 17.5%);
-  --secondary-foreground: hsl(210 40% 98%);
-  --muted: hsl(217.2 32.6% 17.5%);
-  --muted-foreground: hsl(215 20.2% 65.1%);
-  --accent: hsl(217.2 32.6% 17.5%);
-  --accent-foreground: hsl(210 40% 98%);
-  --destructive: hsl(0 62.8% 30.6%);
-  --destructive-foreground: hsl(210 40% 98%);
-  --border: hsl(217.2 32.6% 17.5%);
-  --input: hsl(217.2 32.6% 17.5%);
-  --ring: hsl(217.2 91.2% 59.8%);
-  --chart-1: hsl(220 70% 50%);
-  --chart-2: hsl(160 60% 45%);
-  --chart-3: hsl(30 80% 55%);
-  --chart-4: hsl(280 65% 60%);
-  --chart-5: hsl(340 75% 55%);
+  --card: 0 0% 100%;             /* white surfaces */
+  --card-foreground: 60 3% 8%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 60 3% 8%;
+
+  --primary: 221 83% 53%;        /* steel blue #2563EB (brand accent = CTA) */
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 43 24% 93%;       /* muted warm surface #F1EFEA */
+  --secondary-foreground: 60 3% 8%;
+
+  --muted: 43 24% 93%;
+  --muted-foreground: 50 5% 38%; /* #6B6A62-ish, WCAG AA */
+
+  --accent: 43 24% 93%;          /* neutral hover surface (shadcn) */
+  --accent-foreground: 60 3% 8%;
+
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 42 21% 88%;          /* warm hairline #E6E3DC */
+  --input: 42 16% 84%;
+  --ring: 221 83% 53%;
+
+  --brand: 221 83% 53%;
+  --brand-hover: 224 76% 48%;
+
+  --radius: 0.625rem;
 }
 
 @layer base {
@@ -84,38 +43,90 @@
     @apply border-border;
   }
 
-  body {
-    @apply bg-background text-foreground font-sans antialiased;
-  }
-
   html {
     scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  h1, h2, h3, h4 {
+    @apply tracking-tight;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: hsl(var(--brand) / 0.16);
+  }
+
+  ::-webkit-scrollbar {
+    width: 12px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(42 12% 80%);
+    border: 3px solid hsl(var(--background));
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(42 10% 72%);
   }
 }
 
 @layer components {
-  .hero-gradient {
-    background: linear-gradient(135deg, hsl(210 40% 98%) 0%, hsl(214 32% 91%) 100%);
+  .container-page {
+    @apply mx-auto w-full max-w-6xl px-5 sm:px-6 lg:px-8;
   }
-  
-  .navy-gradient {
-    background: linear-gradient(135deg, var(--navy) 0%, var(--dark-navy) 100%);
+
+  .section-py {
+    @apply py-20 md:py-28;
   }
-  
-  .service-card {
-    @apply bg-slate-50 p-8 rounded-xl hover:shadow-lg transition-all duration-300 border border-slate-100 hover:border-slate-200;
+
+  section[id] {
+    scroll-margin-top: 5rem;
   }
-  
-  .project-card {
-    @apply p-6 rounded-xl text-white relative overflow-hidden;
+
+  /* Mono uppercase eyebrow label */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 font-mono text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground;
   }
-  
-  .project-card::before {
-    content: '';
-    @apply absolute inset-0 bg-gradient-to-br opacity-90;
+
+  /* Border-first card (no default shadow) */
+  .card-surface {
+    @apply rounded-xl border border-border bg-card transition-colors duration-150;
   }
-  
-  .project-card > * {
-    @apply relative z-10;
+
+  /* Subtle dot grid — hero background only, very low presence */
+  .bg-dots {
+    background-image: radial-gradient(hsl(var(--foreground) / 0.06) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  .mask-fade-x {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }

@@ -1,128 +1,91 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
+import Logo from "@/components/logo";
+import { cn } from "@/lib/utils";
+
+const links = [
+  { label: "Services", id: "services" },
+  { label: "Approach", id: "approach" },
+  { label: "Work", id: "work" },
+  { label: "About", id: "about" },
+];
 
 export default function Navigation() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-    setIsMenuOpen(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const go = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    setOpen(false);
   };
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <div className="text-2xl font-bold text-navy">CognitionSync </div>
-          </div>
-          
-          {/* Desktop Navigation */}
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-8">
-              <button 
-                onClick={() => scrollToSection('home')}
-                className="text-navy font-medium hover:text-professional-blue transition duration-300"
-              >
-                Home
-              </button>
-              <button 
-                onClick={() => scrollToSection('services')}
-                className="text-slate-600 hover:text-professional-blue transition duration-300"
-              >
-                Services
-              </button>
-              <button 
-                onClick={() => scrollToSection('projects')}
-                className="text-slate-600 hover:text-professional-blue transition duration-300"
-              >
-                Projects
-              </button>
-              <button 
-                onClick={() => scrollToSection('process')}
-                className="text-slate-600 hover:text-professional-blue transition duration-300"
-              >
-                Process
-              </button>
-              <button 
-                onClick={() => scrollToSection('contact')}
-                className="text-slate-600 hover:text-professional-blue transition duration-300"
-              >
-                Contact
-              </button>
-            </div>
-          </div>
-          
-          <div className="hidden md:block">
-            <Button 
-              onClick={() => scrollToSection('contact')}
-              className="bg-professional-blue text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition duration-300"
+    <header
+      className={cn(
+        "fixed inset-x-0 top-0 z-50 transition-colors duration-200",
+        scrolled ? "border-b border-border bg-background/80 backdrop-blur-md" : "border-b border-transparent",
+      )}
+    >
+      <nav className="container-page flex h-16 items-center justify-between">
+        <button onClick={() => go("home")} aria-label="CognitionSync home">
+          <Logo />
+        </button>
+
+        <div className="hidden items-center gap-8 md:flex">
+          {links.map((l) => (
+            <button
+              key={l.id}
+              onClick={() => go(l.id)}
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
-              Start Your Project
-            </Button>
-          </div>
-          
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-slate-600"
+              {l.label}
+            </button>
+          ))}
+          <button
+            onClick={() => go("contact")}
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors duration-150 hover:bg-brand-hover"
+          >
+            Let's talk
+          </button>
+        </div>
+
+        <button
+          className="-mr-2 p-2 text-foreground md:hidden"
+          onClick={() => setOpen((v) => !v)}
+          aria-label="Toggle menu"
+        >
+          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
+      </nav>
+
+      {open && (
+        <div className="border-t border-border bg-background md:hidden">
+          <div className="container-page flex flex-col py-3">
+            {links.map((l) => (
+              <button
+                key={l.id}
+                onClick={() => go(l.id)}
+                className="py-2.5 text-left text-sm font-medium text-muted-foreground hover:text-foreground"
+              >
+                {l.label}
+              </button>
+            ))}
+            <button
+              onClick={() => go("contact")}
+              className="mt-2 rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-medium text-primary-foreground"
             >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </Button>
+              Let's talk
+            </button>
           </div>
         </div>
-        
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-100 py-4">
-            <div className="flex flex-col space-y-4">
-              <button 
-                onClick={() => scrollToSection('home')}
-                className="text-navy font-medium hover:text-professional-blue transition duration-300 text-left"
-              >
-                Home
-              </button>
-              <button 
-                onClick={() => scrollToSection('services')}
-                className="text-slate-600 hover:text-professional-blue transition duration-300 text-left"
-              >
-                Services
-              </button>
-              <button 
-                onClick={() => scrollToSection('projects')}
-                className="text-slate-600 hover:text-professional-blue transition duration-300 text-left"
-              >
-                Projects
-              </button>
-              <button 
-                onClick={() => scrollToSection('process')}
-                className="text-slate-600 hover:text-professional-blue transition duration-300 text-left"
-              >
-                Process
-              </button>
-              <button 
-                onClick={() => scrollToSection('contact')}
-                className="text-slate-600 hover:text-professional-blue transition duration-300 text-left"
-              >
-                Contact
-              </button>
-              <Button 
-                onClick={() => scrollToSection('contact')}
-                className="bg-professional-blue text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition duration-300 w-full mt-4"
-              >
-                Start Your Project
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
-    </nav>
+      )}
+    </header>
   );
 }
