@@ -111,11 +111,6 @@
     background-image: radial-gradient(hsl(var(--foreground) / 0.06) 1px, transparent 1px);
     background-size: 22px 22px;
   }
-
-  .mask-fade-x {
-    -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
-    mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { EASE, staggerContainer } from "@/lib/motion";
+import { siteConfig } from "@config";
+
+const { hero } = siteConfig;
 
 const scrollTo = (id: string) =>
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -27,22 +30,21 @@ export default function HeroSection() {
           className="mx-auto max-w-3xl text-center"
         >
           <motion.span variants={item} className="eyebrow">
-            Applied AI Studio
+            {hero.eyebrow}
           </motion.span>
 
           <motion.h1
             variants={item}
             className="mt-5 text-display font-semibold text-foreground"
           >
-            Applied AI, built for production.
+            {hero.headline}
           </motion.h1>
 
           <motion.p
             variants={item}
             className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground"
           >
-            We design, build, and deploy AI systems that create durable value — from strategy and
-            LLMs to computer vision, agents, and the infrastructure that runs them.
+            {hero.sub}
           </motion.p>
 
           <motion.div
@@ -50,17 +52,17 @@ export default function HeroSection() {
             className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
           >
             <button
-              onClick={() => scrollTo("contact")}
+              onClick={() => scrollTo(hero.ctaPrimary.targetId)}
               className="group inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-colors duration-150 hover:bg-brand-hover"
             >
-              Start a conversation
+              {hero.ctaPrimary.label}
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </button>
             <button
-              onClick={() => scrollTo("work")}
+              onClick={() => scrollTo(hero.ctaSecondary.targetId)}
               className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-6 py-3 text-sm font-medium text-foreground transition-colors duration-150 hover:bg-secondary"
             >
-              See our work
+              {hero.ctaSecondary.label}
             </button>
           </motion.div>
         </motion.div>

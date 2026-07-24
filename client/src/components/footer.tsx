@@ -1,26 +1,8 @@
 import { Linkedin, Github } from "lucide-react";
 import Logo from "@/components/logo";
+import { siteConfig } from "@config";
 
-const columns = [
-  {
-    title: "Services",
-    links: [
-      { label: "AI Strategy & Advisory", id: "services" },
-      { label: "Generative AI & LLMs", id: "services" },
-      { label: "ML Engineering", id: "services" },
-      { label: "Data & MLOps", id: "services" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { label: "About", id: "about" },
-      { label: "Approach", id: "approach" },
-      { label: "Work", id: "work" },
-      { label: "Contact", id: "contact" },
-    ],
-  },
-];
+const { brand, contactInfo, footer } = siteConfig;
 
 const go = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 
@@ -32,18 +14,18 @@ export default function Footer() {
           <div>
             <Logo />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">
-              An applied-AI studio. We design, build, and deploy AI systems that work in production.
+              {brand.blurb}
             </p>
             <div className="mt-5 flex items-center gap-2">
               <a
-                href="#"
+                href={contactInfo.socials.linkedin}
                 aria-label="LinkedIn"
                 className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
               >
                 <Linkedin className="h-4 w-4" strokeWidth={1.5} />
               </a>
               <a
-                href="#"
+                href={contactInfo.socials.github}
                 aria-label="GitHub"
                 className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
               >
@@ -52,7 +34,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {columns.map((col) => (
+          {footer.columns.map((col) => (
             <div key={col.title}>
               <h4 className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
                 {col.title}
@@ -61,7 +43,7 @@ export default function Footer() {
                 {col.links.map((l) => (
                   <li key={l.label}>
                     <button
-                      onClick={() => go(l.id)}
+                      onClick={() => go(l.targetId)}
                       className="text-sm text-foreground/70 transition-colors hover:text-foreground"
                     >
                       {l.label}
@@ -74,11 +56,14 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-sm text-muted-foreground sm:flex-row">
-          <p>© {new Date().getFullYear()} CognitionSync. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {brand.name}. {footer.legal.copyrightSuffix}</p>
           <div className="flex items-center gap-6">
-            <a href="#" className="transition-colors hover:text-foreground">Privacy</a>
-            <a href="#" className="transition-colors hover:text-foreground">Terms</a>
-            <span>NDA on request</span>
+            {footer.legal.links.map((l) => (
+              <a key={l.label} href={l.href} className="transition-colors hover:text-foreground">
+                {l.label}
+              </a>
+            ))}
+            <span>{footer.legal.note}</span>
           </div>
         </div>
       </div>

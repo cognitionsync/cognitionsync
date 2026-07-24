@@ -2,13 +2,9 @@ import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import Logo from "@/components/logo";
 import { cn } from "@/lib/utils";
+import { siteConfig } from "@config";
 
-const links = [
-  { label: "Services", id: "services" },
-  { label: "Approach", id: "approach" },
-  { label: "Work", id: "work" },
-  { label: "About", id: "about" },
-];
+const { nav, brand } = siteConfig;
 
 export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);
@@ -34,25 +30,25 @@ export default function Navigation() {
       )}
     >
       <nav className="container-page flex h-16 items-center justify-between">
-        <button onClick={() => go("home")} aria-label="CognitionSync home">
+        <button onClick={() => go("home")} aria-label={`${brand.name} home`}>
           <Logo />
         </button>
 
         <div className="hidden items-center gap-8 md:flex">
-          {links.map((l) => (
+          {nav.links.map((l) => (
             <button
-              key={l.id}
-              onClick={() => go(l.id)}
+              key={l.targetId}
+              onClick={() => go(l.targetId)}
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               {l.label}
             </button>
           ))}
           <button
-            onClick={() => go("contact")}
+            onClick={() => go(nav.cta.targetId)}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors duration-150 hover:bg-brand-hover"
           >
-            Let's talk
+            {nav.cta.label}
           </button>
         </div>
 
@@ -68,20 +64,20 @@ export default function Navigation() {
       {open && (
         <div className="border-t border-border bg-background md:hidden">
           <div className="container-page flex flex-col py-3">
-            {links.map((l) => (
+            {nav.links.map((l) => (
               <button
-                key={l.id}
-                onClick={() => go(l.id)}
+                key={l.targetId}
+                onClick={() => go(l.targetId)}
                 className="py-2.5 text-left text-sm font-medium text-muted-foreground hover:text-foreground"
               >
                 {l.label}
               </button>
             ))}
             <button
-              onClick={() => go("contact")}
+              onClick={() => go(nav.cta.targetId)}
               className="mt-2 rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-medium text-primary-foreground"
             >
-              Let's talk
+              {nav.cta.label}
             </button>
           </div>
         </div>
