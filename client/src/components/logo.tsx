@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-export function LogoMark({ className = "h-7 w-7" }: { className?: string }) {
+function LogoMark({ className = "h-7 w-7" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true" role="img">
       <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.5" opacity="0.9" />
