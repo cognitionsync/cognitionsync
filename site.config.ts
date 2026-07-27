@@ -270,6 +270,21 @@ export const siteConfig = {
     subtitle:
       "Tell us what you're working on. No obligation, no sales runaround — just a straight conversation about whether we can help.",
     form: {
+      // ── Delivery ──────────────────────────────────────────────────────────
+      //  Submissions are POSTed as JSON to Formtorch, which stores them and
+      //  emails the form owner. Manage them at https://formtorch.com.
+      //
+      //  The form id in this URL is the credential. It is PUBLIC by design —
+      //  it ships inside the client bundle and only permits writing to this
+      //  one form — so it is safe to commit.
+      //
+      //  Verified response contract:
+      //    200 → { success: true,  submissionId, message }
+      //    4xx → { success: false, errorCode, message }
+      endpoint: "https://formtorch.com/f/an5vy1irpx",
+      // Sent as Formtorch's reserved `_subject` field: `New enquiry from {name}`
+      subjectPrefix: "New enquiry from",
+
       nameLabel: "Name",
       namePlaceholder: "Your name",
       emailLabel: "Work email",

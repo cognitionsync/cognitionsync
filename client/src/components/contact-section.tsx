@@ -20,6 +20,10 @@ const schema = z.object({
   email: z.string().email(f.validation.emailInvalid),
   company: z.string().optional(),
   message: z.string().min(10, f.validation.messageMin),
+  // Honeypot: Formtorch discards the submission when `_honeypot` is non-empty.
+  // It must be hidden with display:none rather than type="hidden" — bots skip
+  // the latter, which is what makes the trap work.
+  _honeypot: z.string().optional(),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -29,16 +33,48 @@ export default function ContactSection() {
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { name: "", email: "", company: "", message: "" },
+    defaultValues: { name: "", email: "", company: "", message: "", _honeypot: "" },
   });
 
-  const onSubmit = async (_data: FormData) => {
+  const onSubmit = async (data: FormData) => {
     setSubmitting(true);
     try {
-      await new Promise((r) => setTimeout(r, 800));
+      if (!f.endpoint) {
+        throw new Error(
+          "contact.form.endpoint is empty in site.config.ts — nothing was sent.",
+        );
+      }
+
+      const res = await fetch(f.endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          // Without this Formtorch may answer a post with an HTML redirect
+          // instead of JSON.
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          company: data.company?.trim() || "—",
+          message: data.message,
+          _subject: `${f.subjectPrefix} ${data.name}`,
+          _honeypot: data._honeypot ?? "",
+        }),
+      });
+
+      // Formtorch returns `{ success: false, errorCode, message }` on failure,
+      // so read the body rather than trusting the status alone.
+      const result = await res.json().catch(() => null);
+      if (!res.ok || !result?.success) {
+        throw new Error(result?.message ?? `Endpoint returned ${res.status}`);
+      }
+
       toast({ title: f.successTitle, description: f.successDescription });
       form.reset();
-    } catch {
+    } catch (err) {
+      console.error("Contact form submission failed:", err);
       toast({
         title: f.errorTitle,
         description: `${f.errorDescriptionPrefix} ${contactInfo.email}`,
@@ -71,6 +107,14 @@ export default function ContactSection() {
         <Reveal delay={0.1} className="mx-auto mt-12 max-w-xl">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+              <input
+                type="text"
+                className="hidden"
+                aria-hidden="true"
+                tabIndex={-1}
+                autoComplete="off"
+                {...form.register("_honeypot")}
+              />
               <div className="grid gap-5 sm:grid-cols-2">
                 <FormField control={form.control} name="name" render={({ field }) => (
                   <FormItem>
