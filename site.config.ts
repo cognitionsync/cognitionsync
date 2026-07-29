@@ -271,18 +271,15 @@ export const siteConfig = {
       "Tell us what you're working on. No obligation, no sales runaround — just a straight conversation about whether we can help.",
     form: {
       // ── Delivery ──────────────────────────────────────────────────────────
-      //  Submissions are POSTed as JSON to Formtorch, which stores them and
-      //  emails the form owner. Manage them at https://formtorch.com.
-      //
-      //  The form id in this URL is the credential. It is PUBLIC by design —
-      //  it ships inside the client bundle and only permits writing to this
-      //  one form — so it is safe to commit.
-      //
-      //  Verified response contract:
-      //    200 → { success: true,  submissionId, message }
-      //    4xx → { success: false, errorCode, message }
-      endpoint: "https://formtorch.com/f/an5vy1irpx",
-      // Sent as Formtorch's reserved `_subject` field: `New enquiry from {name}`
+      //  Submissions are POSTed as JSON to Web3Forms, which emails them to the
+      //  inbox that registered the key. Dashboard: https://web3forms.com
+      
+      accessKey: "10042000-3a1d-4475-8917-7317a66a0581",
+      endpoint: "https://api.web3forms.com/submit",
+      
+      //  Sent as the `subject` field, so every enquiry gets its own subject
+      //  line ("New enquiry from {name}") rather than threading together.
+      //  Edit the prefix here — the name is appended automatically.
       subjectPrefix: "New enquiry from",
 
       nameLabel: "Name",

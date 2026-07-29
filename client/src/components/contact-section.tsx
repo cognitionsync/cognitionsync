@@ -12,7 +12,7 @@ import Reveal from "@/components/primitives/reveal";
 import { useToast } from "@/hooks/use-toast";
 import { siteConfig } from "@config";
 
-const { contact, contactInfo } = siteConfig;
+const { contact, contactInfo, brand } = siteConfig;
 const f = contact.form;
 
 const schema = z.object({
@@ -20,10 +20,10 @@ const schema = z.object({
   email: z.string().email(f.validation.emailInvalid),
   company: z.string().optional(),
   message: z.string().min(10, f.validation.messageMin),
-  // Honeypot: Formtorch discards the submission when `_honeypot` is non-empty.
-  // It must be hidden with display:none rather than type="hidden" — bots skip
-  // the latter, which is what makes the trap work.
-  _honeypot: z.string().optional(),
+  // Honeypot: hidden from humans, so anything that ticks it is a bot.
+  // Web3Forms requires this to be a `checkbox` named exactly `botcheck`,
+  // hidden with display:none rather than type="hidden" — bots skip the latter.
+  botcheck: z.boolean().optional(),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -33,39 +33,44 @@ export default function ContactSection() {
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { name: "", email: "", company: "", message: "", _honeypot: "" },
+    defaultValues: { name: "", email: "", company: "", message: "", botcheck: false },
   });
 
   const onSubmit = async (data: FormData) => {
     setSubmitting(true);
     try {
-      if (!f.endpoint) {
+      if (!f.accessKey) {
         throw new Error(
-          "contact.form.endpoint is empty in site.config.ts — nothing was sent.",
+          "contact.form.accessKey is empty in site.config.ts — nothing was sent.",
         );
       }
+
+      // The subject is built from user input and lands in an email header, so
+      // collapse whitespace and cap the length: a pasted multi-line name must
+      // not be able to break or inject into that header.
+      const subjectName = data.name.replace(/\s+/g, " ").trim().slice(0, 60);
+      const company = data.company?.trim();
 
       const res = await fetch(f.endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          // Without this Formtorch may answer a post with an HTML redirect
-          // instead of JSON.
-          "X-Requested-With": "XMLHttpRequest",
         },
         body: JSON.stringify({
+          access_key: f.accessKey,
+          subject: `${f.subjectPrefix} ${subjectName}`,
+          from_name: brand.name,
           name: data.name,
           email: data.email,
-          company: data.company?.trim() || "—",
+          ...(company ? { company } : {}),
           message: data.message,
-          _subject: `${f.subjectPrefix} ${data.name}`,
-          _honeypot: data._honeypot ?? "",
+          botcheck: data.botcheck,
         }),
       });
 
-      // Formtorch returns `{ success: false, errorCode, message }` on failure,
-      // so read the body rather than trusting the status alone.
+      // Web3Forms answers 200 with `{ success: false }` for a rejected key or
+      // a tripped honeypot, so the status alone is not enough to trust.
       const result = await res.json().catch(() => null);
       if (!res.ok || !result?.success) {
         throw new Error(result?.message ?? `Endpoint returned ${res.status}`);
@@ -108,12 +113,12 @@ export default function ContactSection() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
               <input
-                type="text"
+                type="checkbox"
                 className="hidden"
                 aria-hidden="true"
                 tabIndex={-1}
                 autoComplete="off"
-                {...form.register("_honeypot")}
+                {...form.register("botcheck")}
               />
               <div className="grid gap-5 sm:grid-cols-2">
                 <FormField control={form.control} name="name" render={({ field }) => (
