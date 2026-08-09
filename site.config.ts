@@ -50,6 +50,11 @@ export const siteConfig = {
     ogDescription:
       "We design, build, and deploy AI systems that work in production. Strategy, LLMs, computer vision, agents, and the infrastructure to run them.",
     themeColor: "#F9F7F3",
+    // Canonical origin. Used for <link rel=canonical>, og:url, JSON-LD,
+    // and must match the host nginx treats as canonical (the apex).
+    siteUrl: "https://cognitionsync.com",
+    // Social preview card. Resolved to an absolute URL at build time.
+    ogImage: "/og-image.png",
   },
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -62,8 +67,9 @@ export const siteConfig = {
     // to the contact form when set to "#contact".
     calendarUrl: "https://calendly.com/akifejaz/30min",
     socials: {
-      linkedin: "#",
+      linkedin: "https://www.linkedin.com/company/cognitionsync",
       github: "https://github.com/cognitionsync",
+      youtube: "https://www.youtube.com/@CognitionSync",
     },
   },
 

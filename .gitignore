@@ -43,3 +43,16 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+CLAUDE.md
+CLAUDE.local.md
+DEPLOY.md
+
+# ---- Deployment / infrastructure (PUBLIC REPO -- do not commit) ----
+# Contains server paths, container names, upstream topology and a full copy
+# of the shared production nginx config.
+deploy/
+docker-compose.yml
+docker-compose.*.yml
+*.conf.merged
+nginx.conf*

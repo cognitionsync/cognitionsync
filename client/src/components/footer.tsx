@@ -1,4 +1,4 @@
-import { Linkedin, Github } from "lucide-react";
+import { Linkedin, Github, Youtube } from "lucide-react";
 import Logo from "@/components/logo";
 import { siteConfig } from "@config";
 
@@ -17,20 +17,22 @@ export default function Footer() {
               {brand.blurb}
             </p>
             <div className="mt-5 flex items-center gap-2">
-              <a
-                href={contactInfo.socials.linkedin}
-                aria-label="LinkedIn"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
-              >
-                <Linkedin className="h-4 w-4" strokeWidth={1.5} />
-              </a>
-              <a
-                href={contactInfo.socials.github}
-                aria-label="GitHub"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
-              >
-                <Github className="h-4 w-4" strokeWidth={1.5} />
-              </a>
+              {[
+                { href: contactInfo.socials.linkedin, label: "LinkedIn", Icon: Linkedin },
+                { href: contactInfo.socials.github, label: "GitHub", Icon: Github },
+                { href: contactInfo.socials.youtube, label: "YouTube", Icon: Youtube },
+              ].map(({ href, label, Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  aria-label={label}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
+                >
+                  <Icon className="h-4 w-4" strokeWidth={1.5} />
+                </a>
+              ))}
             </div>
           </div>
 
