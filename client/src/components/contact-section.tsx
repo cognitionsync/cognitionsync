@@ -36,6 +36,26 @@ export default function ContactSection() {
     defaultValues: { name: "", email: "", company: "", message: "", botcheck: false },
   });
 
+  // Mirror the outcome to our own container so submissions and failures are
+  // visible server-side (docker logs + /data/form-submissions.json). Web3Forms
+  // is posted to directly from the browser, so nothing else ever reaches us.
+  // Fire-and-forget: this must never block or break the user-facing flow.
+  const recordLocally = (outcome: string, data: FormData, error?: string) => {
+    void fetch("/api/submissions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      keepalive: true,
+      body: JSON.stringify({
+        outcome,
+        name: data.name,
+        email: data.email,
+        company: data.company,
+        message: data.message,
+        ...(error ? { error } : {}),
+      }),
+    }).catch(() => {});
+  };
+
   const onSubmit = async (data: FormData) => {
     setSubmitting(true);
     try {
@@ -76,10 +96,12 @@ export default function ContactSection() {
         throw new Error(result?.message ?? `Endpoint returned ${res.status}`);
       }
 
+      recordLocally("success", data);
       toast({ title: f.successTitle, description: f.successDescription });
       form.reset();
     } catch (err) {
       console.error("Contact form submission failed:", err);
+      recordLocally("failed", data, err instanceof Error ? err.message : String(err));
       toast({
         title: f.errorTitle,
         description: `${f.errorDescriptionPrefix} ${contactInfo.email}`,

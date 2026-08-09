@@ -16,19 +16,17 @@ RUN npm run build
 FROM node:22-alpine
 WORKDIR /app
 
-RUN npm install -g serve@14
-
 # vite.config.ts builds to client/dist
 COPY --from=build /app/client/dist ./dist
 
-# serve (serve-handler) uses 404.html for unmatched paths and returns a real
-# HTTP 404 with it. Copying the SPA shell there means the branded NotFound page
-# still renders, but crawlers get a 404 instead of a soft-404 200.
+# Unmatched paths are served 404.html with a real HTTP 404 rather than a
+# soft-404 200. The site has a single route, so there is no SPA fallback --
+# if real client-side routes are added later, server.js needs to handle them.
 RUN cp dist/index.html dist/404.html
 
-EXPOSE 3000
+# Dependency-free static server, plus POST /api/submissions which appends
+# contact-form results to /data/form-submissions.json (a mounted volume).
+COPY server.js ./
 
-# NOTE: deliberately NOT using -s. The site has a single route ("/"), so SPA
-# fallback would only turn every bad URL into a 200. If real client-side routes
-# are added later, they need explicit rewrites in a dist/serve.json, or -s back.
-CMD ["serve", "dist", "-l", "3000"]
+EXPOSE 3000
+CMD ["node", "server.js"]
