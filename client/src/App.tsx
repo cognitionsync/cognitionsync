@@ -8,9 +8,9 @@ import NotFound from "@/pages/not-found";
 // routing works whether served from a subpath (GitHub Pages) or the root.
 const routerBase = import.meta.env.BASE_URL.replace(/\/$/, "");
 
-function AppRoutes() {
+function AppRoutes({ ssrPath }: { ssrPath?: string }) {
   return (
-    <WouterRouter base={routerBase}>
+    <WouterRouter base={routerBase} ssrPath={ssrPath}>
       <Switch>
         <Route path="/" component={Home} />
         <Route component={NotFound} />
@@ -19,11 +19,16 @@ function AppRoutes() {
   );
 }
 
-function App() {
+/**
+ * `ssrPath` is supplied only by the build-time prerender, which has no window
+ * for wouter to read a location from. In the browser it stays undefined and
+ * routing behaves exactly as it did before.
+ */
+function App({ ssrPath }: { ssrPath?: string }) {
   return (
     <MotionConfig reducedMotion="user">
       <Toaster />
-      <AppRoutes />
+      <AppRoutes ssrPath={ssrPath} />
     </MotionConfig>
   );
 }
