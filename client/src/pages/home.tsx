@@ -4,6 +4,7 @@ import TrustStrip from "@/components/trust-strip";
 import ServicesSection from "@/components/services-section";
 import ApproachSection from "@/components/approach-section";
 import WorkSection from "@/components/work-section";
+import ProductsSection from "@/components/products-section";
 import AboutSection from "@/components/about-section";
 import EngagementSection from "@/components/engagement-section";
 import FaqSection from "@/components/faq-section";
@@ -20,6 +21,7 @@ export default function Home() {
         <ServicesSection />
         <ApproachSection />
         <WorkSection />
+        <ProductsSection />
         <AboutSection />
         <EngagementSection />
         <FaqSection />

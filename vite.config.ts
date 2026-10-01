@@ -41,6 +41,15 @@ function buildJsonLd(): unknown {
         description: s.description,
         email: siteConfig.contactInfo.email,
         sameAs: socials,
+        // The inverse of the parentOrganization each product declares. Where the
+        // product publishes an @id, reuse it so both graphs name one entity.
+        subOrganization: siteConfig.products.items.map((p) => ({
+          "@type": "Organization",
+          ...(p.orgId ? { "@id": p.orgId } : {}),
+          name: p.name,
+          url: p.href,
+          description: p.desc,
+        })),
         knowsAbout: siteConfig.services.items.map((i) => i.name),
         hasOfferCatalog: {
           "@type": "OfferCatalog",

@@ -27,7 +27,7 @@ export function render(): string {
  * Format follows llmstxt.org: an H1, a blockquote summary, then link sections.
  */
 export function llmsTxt(): string {
-  const { brand, seo, services, faq, contactInfo } = siteConfig;
+  const { brand, seo, services, products, faq, contactInfo } = siteConfig;
   const origin = seo.siteUrl.replace(/\/$/, "");
 
   const socials = Object.values(contactInfo.socials).filter(
@@ -45,6 +45,10 @@ ${socials.length ? `Profiles: ${socials.join(", ")}\n` : ""}
 ## Services
 
 ${services.items.map((item) => `- **${item.name}**: ${item.desc}`).join("\n")}
+
+## Products
+
+${products.items.map((item) => `- [${item.name}](${item.href}): ${item.desc}`).join("\n")}
 
 ## Frequently asked
 
