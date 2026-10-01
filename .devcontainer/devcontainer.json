@@ -1,0 +1,49 @@
+{
+  "name": "cognitionsync",
+
+  // Node 22 LTS. Vite 5.4 supports Node 18/20/22; the repo also builds on the
+  // Node 24 currently installed on the host.
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+
+  "workspaceFolder": "/workspaces/cognitionsync",
+
+  // node_modules lives in a named volume rather than the bind mount so the
+  // container's platform-specific binaries (esbuild, rollup) never collide with
+  // the host's, and so installs aren't slowed by the bind mount.
+  "mounts": [
+    "source=cognitionsync-node-modules,target=/workspaces/cognitionsync/node_modules,type=volume"
+  ],
+
+  "onCreateCommand": "sudo chown -R node:node /workspaces/cognitionsync/node_modules",
+  "postCreateCommand": "npm ci",
+
+  // Vite binds to localhost by default, which is unreachable from outside the
+  // container. Start the dev server with:
+  //     npm run dev -- --host 0.0.0.0
+  // (or add `server: { host: true }` to vite.config.ts to make it the default).
+  "forwardPorts": [5173],
+  "portsAttributes": {
+    "5173": {
+      "label": "vite dev",
+      "onAutoForward": "notify"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.vscode-typescript-next"
+      ],
+      "settings": {
+        "editor.formatOnSave": false,
+        "tailwindCSS.experimental.configFile": "tailwind.config.ts",
+        "typescript.tsdk": "node_modules/typescript/lib"
+      }
+    }
+  },
+
+  "remoteUser": "node"
+}

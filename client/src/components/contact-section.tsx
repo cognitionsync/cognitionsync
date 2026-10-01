@@ -2,270 +2,200 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import { Mail, CalendarClock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Mail, Globe, Rocket, Phone, MessageCircle, Calendar } from "lucide-react";
+import {
+  Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
+} from "@/components/ui/form";
+import Reveal from "@/components/primitives/reveal";
 import { useToast } from "@/hooks/use-toast";
+import { siteConfig } from "@config";
 
-const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
+const { contact, contactInfo, brand } = siteConfig;
+const f = contact.form;
+
+const schema = z.object({
+  name: z.string().min(2, f.validation.nameMin),
+  email: z.string().email(f.validation.emailInvalid),
   company: z.string().optional(),
-  project: z.string().min(1, "Please select a project type"),
-  message: z.string().min(10, "Message must be at least 10 characters"),
+  message: z.string().min(10, f.validation.messageMin),
+  // Honeypot: hidden from humans, so anything that ticks it is a bot.
+  // Web3Forms requires this to be a `checkbox` named exactly `botcheck`,
+  // hidden with display:none rather than type="hidden" — bots skip the latter.
+  botcheck: z.boolean().optional(),
 });
-
-type FormData = z.infer<typeof formSchema>;
+type FormData = z.infer<typeof schema>;
 
 export default function ContactSection() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      company: "",
-      project: "",
-      message: "",
-    },
+    resolver: zodResolver(schema),
+    defaultValues: { name: "", email: "", company: "", message: "", botcheck: false },
   });
 
+  // Mirror the outcome to our own container so submissions and failures are
+  // visible server-side (docker logs + /data/form-submissions.json). Web3Forms
+  // is posted to directly from the browser, so nothing else ever reaches us.
+  // Fire-and-forget: this must never block or break the user-facing flow.
+  const recordLocally = (outcome: string, data: FormData, error?: string) => {
+    void fetch("/api/submissions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      keepalive: true,
+      body: JSON.stringify({
+        outcome,
+        name: data.name,
+        email: data.email,
+        company: data.company,
+        message: data.message,
+        ...(error ? { error } : {}),
+      }),
+    }).catch(() => {});
+  };
+
   const onSubmit = async (data: FormData) => {
-    setIsSubmitting(true);
+    setSubmitting(true);
     try {
-      // Simulate form submission
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Message sent successfully!",
-        description: "We'll get back to you within 24 hours.",
+      if (!f.accessKey) {
+        throw new Error(
+          "contact.form.accessKey is empty in site.config.ts — nothing was sent.",
+        );
+      }
+
+      // The subject is built from user input and lands in an email header, so
+      // collapse whitespace and cap the length: a pasted multi-line name must
+      // not be able to break or inject into that header.
+      const subjectName = data.name.replace(/\s+/g, " ").trim().slice(0, 60);
+      const company = data.company?.trim();
+
+      const res = await fetch(f.endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          access_key: f.accessKey,
+          subject: `${f.subjectPrefix} ${subjectName}`,
+          from_name: brand.name,
+          name: data.name,
+          email: data.email,
+          ...(company ? { company } : {}),
+          message: data.message,
+          botcheck: data.botcheck,
+        }),
       });
-      
+
+      // Web3Forms answers 200 with `{ success: false }` for a rejected key or
+      // a tripped honeypot, so the status alone is not enough to trust.
+      const result = await res.json().catch(() => null);
+      if (!res.ok || !result?.success) {
+        throw new Error(result?.message ?? `Endpoint returned ${res.status}`);
+      }
+
+      recordLocally("success", data);
+      toast({ title: f.successTitle, description: f.successDescription });
       form.reset();
-    } catch (error) {
+    } catch (err) {
+      console.error("Contact form submission failed:", err);
+      recordLocally("failed", data, err instanceof Error ? err.message : String(err));
       toast({
-        title: "Error sending message",
-        description: "Please try again or contact us directly at CognitionSync@gmail.com",
+        title: f.errorTitle,
+        description: `${f.errorDescriptionPrefix} ${contactInfo.email}`,
         variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false);
+      setSubmitting(false);
     }
   };
 
   return (
-    <section id="contact" className="py-20 navy-gradient">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-white mb-4">Ready to Collaborate?</h2>
-          <p className="text-xl text-slate-300 max-w-3xl mx-auto mb-8">
-            Whether you're a startup, agency, or enterprise, if you're looking to solve a problem with tech — we'd love to help.
-          </p>
-          
-          {/* Quick Action Buttons */}
-          <div className="flex flex-wrap justify-center gap-4 mb-8">
-            <a 
-              href="mailto:CognitionSync@gmail.com" 
-              className="inline-flex items-center px-6 py-3 bg-professional-blue hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-300 hover:shadow-lg"
-            >
-              <Mail className="mr-2 h-5 w-5" />
-              Email Us
-            </a>
-            <a 
-              href="tel:+15551234567" 
-              className="inline-flex items-center px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-semibold rounded-lg transition-all duration-300 border border-white border-opacity-30"
-            >
-              <Phone className="mr-2 h-5 w-5" />
-              Call Now
-            </a>
-            <button 
-              onClick={() => scrollToSection('contact')}
-              className="inline-flex items-center px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-semibold rounded-lg transition-all duration-300 border border-white border-opacity-30"
-            >
-              <Calendar className="mr-2 h-5 w-5" />
-              Book a Slot
-            </button>
-          </div>
+    <section id="contact" className="section-py border-t border-border">
+      <div className="container-page">
+        <div className="mx-auto max-w-xl text-center">
+          <Reveal>
+            <span className="eyebrow justify-center">{contact.eyebrow}</span>
+          </Reveal>
+          <Reveal delay={0.05}>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+              {contact.title}
+            </h2>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+              {contact.subtitle}
+            </p>
+          </Reveal>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12">
-          <div>
-            <h3 className="text-2xl font-bold text-white mb-8">Get in Touch</h3>
-            <div className="space-y-6">
-              <a 
-                href="mailto:CognitionSync@gmail.com" 
-                className="flex items-center group hover:bg-white hover:bg-opacity-10 p-3 rounded-lg transition-all duration-300"
-              >
-                <div className="w-12 h-12 bg-professional-blue bg-opacity-20 rounded-lg flex items-center justify-center mr-4 group-hover:bg-professional-blue group-hover:bg-opacity-30">
-                  <Mail className="text-professional h-6 w-6 group-hover:text-white" />
-                </div>
-                <div>
-                  <div className="text-slate-300 text-sm group-hover:text-white">Email us</div>
-                  <div className="text-white font-semibold">CognitionSync@gmail.com</div>
-                </div>
-              </a>
-              
-              <a 
-                href="tel:+15551234567" 
-                className="flex items-center group hover:bg-white hover:bg-opacity-10 p-3 rounded-lg transition-all duration-300"
-              >
-                <div className="w-12 h-12 bg-professional-blue bg-opacity-20 rounded-lg flex items-center justify-center mr-4 group-hover:bg-professional-blue group-hover:bg-opacity-30">
-                  <Phone className="text-professional h-6 w-6 group-hover:text-white" />
-                </div>
-                <div>
-                  <div className="text-slate-300 text-sm group-hover:text-white">Call us</div>
-                  <div className="text-white font-semibold">+1 (555) 123-4567</div>
-                </div>
-              </a>
-              
-              <button 
-                onClick={() => scrollToSection('contact')}
-                className="flex items-center group hover:bg-white hover:bg-opacity-10 p-3 rounded-lg transition-all duration-300 w-full text-left"
-              >
-                <div className="w-12 h-12 bg-professional-blue bg-opacity-20 rounded-lg flex items-center justify-center mr-4 group-hover:bg-professional-blue group-hover:bg-opacity-30">
-                  <MessageCircle className="text-professional h-6 w-6 group-hover:text-white" />
-                </div>
-                <div>
-                  <div className="text-slate-300 text-sm group-hover:text-white">Live chat</div>
-                  <div className="text-white font-semibold">Available 9 AM - 6 PM EST</div>
-                </div>
-              </button>
-              
-              <button 
-                onClick={() => scrollToSection('contact')}
-                className="flex items-center group hover:bg-white hover:bg-opacity-10 p-3 rounded-lg transition-all duration-300 w-full text-left"
-              >
-                <div className="w-12 h-12 bg-professional-blue bg-opacity-20 rounded-lg flex items-center justify-center mr-4 group-hover:bg-professional-blue group-hover:bg-opacity-30">
-                  <Calendar className="text-professional h-6 w-6 group-hover:text-white" />
-                </div>
-                <div>
-                  <div className="text-slate-300 text-sm group-hover:text-white">Book a consultation</div>
-                  <div className="text-white font-semibold">Free 30-min strategy call</div>
-                </div>
-              </button>
-              
-              <div className="flex items-center group p-3 rounded-lg opacity-60">
-                <div className="w-12 h-12 bg-professional-blue bg-opacity-20 rounded-lg flex items-center justify-center mr-4">
-                  <Globe className="text-professional h-6 w-6" />
-                </div>
-                <div>
-                  <div className="text-slate-300 text-sm">Website</div>
-                  <div className="text-white font-semibold">Coming Soon</div>
-                </div>
+        <Reveal delay={0.1} className="mx-auto mt-12 max-w-xl">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+              <input
+                type="checkbox"
+                className="hidden"
+                aria-hidden="true"
+                tabIndex={-1}
+                autoComplete="off"
+                {...form.register("botcheck")}
+              />
+              <div className="grid gap-5 sm:grid-cols-2">
+                <FormField control={form.control} name="name" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{f.nameLabel}</FormLabel>
+                    <FormControl><Input placeholder={f.namePlaceholder} {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="email" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{f.emailLabel}</FormLabel>
+                    <FormControl><Input type="email" placeholder={f.emailPlaceholder} {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
               </div>
-            </div>
-          </div>
+              <FormField control={form.control} name="company" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    {f.companyLabel}{" "}
+                    <span className="text-muted-foreground">{f.companyOptionalSuffix}</span>
+                  </FormLabel>
+                  <FormControl><Input placeholder={f.companyPlaceholder} {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="message" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{f.messageLabel}</FormLabel>
+                  <FormControl>
+                    <Textarea rows={4} placeholder={f.messagePlaceholder} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-colors duration-150 hover:bg-brand-hover disabled:opacity-60"
+              >
+                {submitting ? f.submittingLabel : f.submitLabel}
+              </button>
+            </form>
+          </Form>
 
-          <div className="bg-white p-8 rounded-xl">
-            <h3 className="text-2xl font-bold text-navy mb-6">Start Your Project</h3>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Name *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Your Name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email *</FormLabel>
-                        <FormControl>
-                          <Input type="email" placeholder="your@email.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <FormField
-                  control={form.control}
-                  name="company"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Company</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Your Company" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="project"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Project Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a service" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="web-development">Web Development</SelectItem>
-                          <SelectItem value="ai-solutions">AI Solutions</SelectItem>
-                          <SelectItem value="browser-extensions">Browser Extensions</SelectItem>
-                          <SelectItem value="automation-services">Automation Services</SelectItem>
-                          <SelectItem value="cloud-devops">Cloud & DevOps</SelectItem>
-                          <SelectItem value="saas-microservices">SaaS & Microservices</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="message"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Message *</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          rows={4} 
-                          placeholder="Tell us about your project..." 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button 
-                  type="submit" 
-                  className="w-full bg-professional-blue text-white py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition duration-300"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Sending..." : "Send Message"}
-                </Button>
-              </form>
-            </Form>
+          <div className="mt-6 flex flex-col items-center justify-center gap-3 text-sm text-muted-foreground sm:flex-row sm:gap-8">
+            <a href={`mailto:${contactInfo.email}`} className="inline-flex items-center gap-2 transition-colors hover:text-foreground">
+              <Mail className="h-4 w-4" strokeWidth={1.5} /> {contactInfo.email}
+            </a>
+            <a href={contactInfo.calendarUrl} className="inline-flex items-center gap-2 transition-colors hover:text-foreground">
+              <CalendarClock className="h-4 w-4" strokeWidth={1.5} /> {contact.calendarLabel}
+            </a>
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );
