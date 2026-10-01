@@ -26,6 +26,9 @@ export type ServiceIconName =
 
 type LinkRef = { label: string; targetId: string };
 type ExternalLink = { label: string; href: string };
+// `orgId` is the @id the product itself declares in its structured data,
+// so both sites name the same entity. Leave it out when the product has none.
+type Product = { name: string; href: string; category: string; desc: string; orgId?: string };
 
 export const siteConfig = {
   // ──────────────────────────────────────────────────────────────────────────
@@ -82,6 +85,7 @@ export const siteConfig = {
       { label: "Services", targetId: "services" },
       { label: "Approach", targetId: "approach" },
       { label: "Work", targetId: "work" },
+      { label: "Products", targetId: "products" },
       { label: "About", targetId: "about" },
     ] as LinkRef[],
     cta: { label: "Let's talk", targetId: "contact" } as LinkRef,
@@ -207,6 +211,59 @@ export const siteConfig = {
   },
 
   // ──────────────────────────────────────────────────────────────────────────
+  //  PRODUCTS — live products the studio builds and runs, each on its own
+  //  subdomain. Rendered as real links in the page and the footer, written to
+  //  llms.txt, and declared as subOrganization in the structured data. List
+  //  only products whose URL is live and confirmed.
+  // ──────────────────────────────────────────────────────────────────────────
+  products: {
+    eyebrow: "Products",
+    title: "Products we build and run",
+    subtitle:
+      "Live products from the studio, each under its own name and on its own domain.",
+    items: [
+      {
+        name: "ALL RISC-V JOBS",
+        href: "https://allriscvjobs.cognitionsync.com/",
+        orgId: "https://allriscvjobs.cognitionsync.com/#organization",
+        category: "Job board",
+        desc: "Semiconductor, silicon and systems jobs at companies in the RISC-V ecosystem, collected twice a day from each employer's own careers page.",
+      },
+      {
+        name: "AxiomSquare",
+        href: "https://axiomsquarepk.com/",
+        category: "Tax compliance",
+        desc: "FBR digital invoicing and POS for Pakistani businesses: FBR-compliant sales tax invoices with QR codes, submitted to FBR in real time.",
+      },
+      {
+        name: "PraTax",
+        href: "https://pra.axiomsquarepk.com/",
+        orgId: "https://pra.axiomsquarepk.com/#org",
+        category: "Tax compliance",
+        desc: "PRA digital invoicing for Punjab service businesses: Punjab Revenue Authority sales tax invoices with QR codes, reported to PRA in real time.",
+      },
+      {
+        name: "BuildingMall",
+        href: "https://buildingmall.cognitionsync.com/",
+        category: "Building materials",
+        desc: "Building materials delivered in Lahore: bricks, steel, cement, sand. Grade-wise transparent pricing and a free construction cost calculator.",
+      },
+      {
+        name: "DocuMind",
+        href: "https://documind.cognitionsync.com/",
+        category: "Document intelligence",
+        desc: "Reads a week's worth of PDFs in minutes and answers questions against them.",
+      },
+      {
+        name: "CognitionSync Labs",
+        href: "https://demos.cognitionsync.com/",
+        category: "Live demos",
+        desc: "Live demos of the agents. No signup, no slides.",
+      },
+    ] as Product[],
+  },
+
+  // ──────────────────────────────────────────────────────────────────────────
   //  ABOUT — mission blurb + numbered principles list.
   // ──────────────────────────────────────────────────────────────────────────
   about: {
@@ -318,6 +375,8 @@ export const siteConfig = {
   //  FOOTER — link columns + legal strip.
   // ──────────────────────────────────────────────────────────────────────────
   footer: {
+    // Title of the footer column that lists `products.items` as links.
+    productsTitle: "Products",
     columns: [
       {
         title: "Services",

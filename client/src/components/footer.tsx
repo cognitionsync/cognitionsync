@@ -2,7 +2,7 @@ import { Linkedin, Github, Youtube } from "lucide-react";
 import Logo from "@/components/logo";
 import { siteConfig } from "@config";
 
-const { brand, contactInfo, footer } = siteConfig;
+const { brand, contactInfo, footer, products } = siteConfig;
 
 const go = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 
@@ -10,7 +10,7 @@ export default function Footer() {
   return (
     <footer className="border-t border-border bg-secondary/40">
       <div className="container-page py-14">
-        <div className="grid gap-10 md:grid-cols-[1.5fr_1fr_1fr] md:gap-8">
+        <div className="grid gap-10 md:grid-cols-[1.5fr_1fr_1fr_1fr] md:gap-8">
           <div>
             <Logo />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">
@@ -55,6 +55,22 @@ export default function Footer() {
               </ul>
             </div>
           ))}
+
+          {/* Real links, unlike the scroll buttons above, so crawlers reach each product. */}
+          <div>
+            <h4 className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
+              {footer.productsTitle}
+            </h4>
+            <ul className="mt-4 space-y-3">
+              {products.items.map((p) => (
+                <li key={p.href}>
+                  <a href={p.href} className="text-sm text-foreground/70 transition-colors hover:text-foreground">
+                    {p.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-sm text-muted-foreground sm:flex-row">
